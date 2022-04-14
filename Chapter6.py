@@ -32,6 +32,7 @@ def stackImages(scale,imgArray):
         hor= np.hstack(imgArray)
         ver = hor
     return ver
+
 imgStack = stackImages(0.5([img,img,img]))
 
 imgHor = np.hstack((img,img))
