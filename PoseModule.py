@@ -51,8 +51,8 @@ class poseDetector():
         # print(angle)
         # Draw
         if draw:
-            cv2.line(img, (x1, y1), (x2, y2), (255, 255, 255), 3)
-            cv2.line(img, (x3, y3), (x2, y2), (255, 255, 255), 3)
+            cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+            cv2.line(img, (x3, y3), (x2, y2), (255, 150, 255), 3)
             cv2.circle(img, (x1, y1), 10, (0, 0, 255), cv2.FILLED)
             cv2.circle(img, (x1, y1), 15, (0, 0, 255), 2)
             cv2.circle(img, (x2, y2), 10, (0, 0, 255), cv2.FILLED)
