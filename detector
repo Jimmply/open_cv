@@ -1,1 +1,68 @@
+import cv2
+import numpy as np
 
+class ColorDetector:
+    def __init__(self, frame_width=640, frame_height=480):
+        self.frame_width = frame_width
+        self.frame_height = frame_height
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
+        self.cap.set(cv2.CAP_PROP_BRIGHTNESS, 150)
+        self.my_colors = [[5, 107, 0, 19, 255, 255],
+                          [133, 56, 0, 159, 156, 255],
+                          [57, 76, 0, 100, 255, 255],
+                          [90, 48, 0, 118, 255, 255]]
+        self.my_color_values = [(51, 153, 255),  # Orange
+                                (255, 0, 255),   # Purple
+                                (0, 255, 0),     # Green
+                                (255, 0, 0)]     # Blue
+        self.my_points = []  # [x, y, color_id]
+
+    def find_color(self, img):
+        img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        new_points = []
+        for i, color in enumerate(self.my_colors):
+            lower = np.array(color[:3])
+            upper = np.array(color[3:])
+            mask = cv2.inRange(img_hsv, lower, upper)
+            x, y = self.get_contours(mask)
+            if x != 0 and y != 0:
+                new_points.append([x, y, i])
+                cv2.circle(img_result, (x, y), 15, self.my_color_values[i], cv2.FILLED)
+        return new_points
+
+    def get_contours(self, img):
+        contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        x, y, w, h = 0, 0, 0, 0
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area > 500:
+                peri = cv2.arcLength(cnt, True)
+                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                x, y, w, h = cv2.boundingRect(approx)
+        return x + w // 2, y
+
+    def draw_on_canvas(self):
+        for point in self.my_points:
+            cv2.circle(img_result, (point[0], point[1]), 10, self.my_color_values[point[2]], cv2.FILLED)
+
+    def run(self):
+        while True:
+            success, img = self.cap.read()
+            global img_result
+            img_result = img.copy()
+            new_points = self.find_color(img)
+            if new_points:
+                self.my_points.extend(new_points)
+            if self.my_points:
+                self.draw_on_canvas()
+            cv2.imshow("Result", img_result)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        self.cap.release()
+        cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    detector = ColorDetector()
+    detector.run()
